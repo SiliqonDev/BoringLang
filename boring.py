@@ -64,12 +64,12 @@ T_FLOAT = "FLOAT"
 T_IDENTIFIER = "IDENTIFIER"
 T_KEYWORD = "KEYWORD"
 T_EQUALS = "EQUALS"
-T_VALUE_EQUALS = "VALUE_EQUALS"
-T_NOT_EQUALS = "NOT_EQUALS"
-T_LESS_THAN = "LESS_THAN"
-T_GREATER_THAN = "GREATER_THAN"
-T_LESS_THAN_EQUALS = "LESS_THAN_EQUALS"
-T_GREATER_THAN_EQUALS = "GREATER_THAN_EQUALS"
+T_EE = "VALUE_EQUALS"
+T_NE = "NOT_EQUALS"
+T_LE = "LESS_THAN"
+T_GE = "GREATER_THAN"
+T_LTE = "LESS_THAN_EQUALS"
+T_GTE = "GREATER_THAN_EQUALS"
 T_PLUS = "PLUS"
 T_MINUS = "MINUS"
 T_MUL = "MUL"
@@ -189,7 +189,7 @@ class Lexer:
             elif self.current_char == "!":
                 tok, error = self.make_multichar_operator(
                     "!", "=",
-                    T_NOT_EQUALS, None
+                    T_NE, None
                 )
                 if error: return [], error
                 tokens.append(tok)
@@ -203,21 +203,21 @@ class Lexer:
             elif self.current_char == "=":
                 tok, error = self.make_multichar_operator(
                     "=", "=",
-                    T_VALUE_EQUALS, T_EQUALS
+                    T_EE, T_EQUALS
                 )
                 if error: return [], error
                 tokens.append(tok)
             elif self.current_char == "<":
                 tok, error = self.make_multichar_operator(
                     "<", "=",
-                    T_LESS_THAN_EQUALS, T_LESS_THAN
+                    T_LTE, T_LE
                 )
                 if error: return [], error
                 tokens.append(tok)
             elif self.current_char == ">":
                 tok, error = self.make_multichar_operator(
                     ">", "=",
-                    T_GREATER_THAN_EQUALS, T_GREATER_THAN
+                    T_GTE, T_GE
                 )
                 if error: return [], error
                 tokens.append(tok)
@@ -726,7 +726,7 @@ class Parser:
             if res.error: return res
             return res.success(UnaryOpNode(op_tok, node))
         
-        node = res.register(self.bin_op(self.arith_expr, (T_VALUE_EQUALS, T_NOT_EQUALS, T_LESS_THAN, T_GREATER_THAN, T_LESS_THAN_EQUALS, T_GREATER_THAN_EQUALS)))
+        node = res.register(self.bin_op(self.arith_expr, (T_EE, T_NE, T_LE, T_GE, T_LTE, T_GTE)))
 
         if res.error:
             return res.failure(InvalidSyntaxError(
@@ -1192,17 +1192,17 @@ class Interpreter:
             result, error = left.floor_div_by(right)
         elif node.op_tok.type == T_POW:
             result, error = left.to_pow_of(right)
-        elif node.op_tok.type == T_VALUE_EQUALS:
+        elif node.op_tok.type == T_EE:
             result, error = left.get_comparison_equals(right)
-        elif node.op_tok.type == T_NOT_EQUALS:
+        elif node.op_tok.type == T_NE:
             result, error = left.get_comparison_notequals(right)
-        elif node.op_tok.type == T_LESS_THAN:
+        elif node.op_tok.type == T_LE:
             result, error = left.get_comparison_lessthan(right)
-        elif node.op_tok.type == T_GREATER_THAN:
+        elif node.op_tok.type == T_GE:
             result, error = left.get_comparison_greaterthan(right)
-        elif node.op_tok.type == T_LESS_THAN_EQUALS:
+        elif node.op_tok.type == T_LTE:
             result, error = left.get_comparison_lessthanequals(right)
-        elif node.op_tok.type == T_GREATER_THAN_EQUALS:
+        elif node.op_tok.type == T_GTE:
             result, error = left.get_comparison_greaterthanequals(right)
         elif node.op_tok.matches(T_KEYWORD, 'and'):
             result, error = left.and_with(right)

@@ -1,7 +1,7 @@
-expr      : KEYWORD:VAR IDENTIFIER EQUALS expr
-          : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
+expr      : KEYWORD:var IDENTIFIER EQUALS expr
+          : comp-expr ((KEYWORD:and|KEYWORD:or) comp-expr)*
 
-comp-expr : KEYWORD:NOT comp-expr
+comp-expr : KEYWORD:var comp-expr
           : arith-expr ((EE|LR|GT|LTE|GTE) arith-expr)*
 
 arith-expr: term ((PLUS|MINUS) term)*
@@ -22,16 +22,16 @@ atom      : INT|FLOAT|IDENTIFIER
           : while-expr
           : func-def
 
-if-expr   : KEYWORD:IF expr KEYWORD:THEN expr
-            (KEYWORD:ELIF expr KEYWORD:THEN expr)*
-            (KEYWORLD:ELSE expr)?
+if-expr   : KEYWORD:if expr KEYWORD:then expr
+            (KEYWORD:elif expr KEYWORD:then expr)*
+            (KEYWORLD:else expr)?
 
-for-expr  : KEYWORD:FOR IDENTIFIER EQUALS expr KEYWORD:TO expr
-            (KEYWORD:STEP expr)? KEYWORD:THEN expr
+for-expr  : KEYWORD:for IDENTIFIER EQUALS expr KEYWORD:to expr
+            (KEYWORD:step expr)? KEYWORD:do expr
 
-while-expr: KEYWORD:WHILE expr KEYWORD:THEN expr
+while-expr: KEYWORD:while expr KEYWORD:do expr
 
-func-def  : KEYWORD:FN IDENTIFIER?
+func-def  : KEYWORD:fn IDENTIFIER?
             LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
             ARROW expr
 
