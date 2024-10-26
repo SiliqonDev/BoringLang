@@ -577,7 +577,7 @@ class Parser:
         if not self.current_tok.matches(T_KEYWORD, 'then'):
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected '1'"
+                "Expected 'then'"
             ))
         
         res.register_next()
@@ -1627,8 +1627,8 @@ class Interpreter:
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("null", Number.null)
-global_symbol_table.set("true", Number.false)
-global_symbol_table.set("false", Number.true)
+global_symbol_table.set("false", Number.false)
+global_symbol_table.set("true", Number.true)
 def run(filename, text):
     lexer = Lexer(filename, text)
     tokens, error = lexer.make_tokens()
