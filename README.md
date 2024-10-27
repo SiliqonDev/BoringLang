@@ -35,7 +35,7 @@ boring > true + false
 
 > ### String
 
-A string is any collection of ascii characters encased in `" "` (double quotes)
+A string is any collection of ascii characters encased in `" "` (double quotes) or `' '` (single quotes)
 * An empty string has no characters ("")
 * A string can contain any ascii characters
 * Strings can be concatenated using the `+` operator or multiplied using the `*` operator
@@ -44,16 +44,19 @@ A string is any collection of ascii characters encased in `" "` (double quotes)
 Example -
 ```
 boring > var s = "Hello world!"
-Hello world!
+'Hello world!'
 
 boring > s + " 123"
-Hello world! 123
+'Hello world! 123'
 boring > s*3
-Hello world!Hello world!Hello world!
+'Hello world!Hello world!Hello world!'
 
 boring > var other = "\"Woo!\"\nNice"
-"Woo!"
-Nice
+'"Woo!"
+Nice'
+
+boring > 'a' + (var c = 'c')
+'ac'
 ```
 
 > ### List
