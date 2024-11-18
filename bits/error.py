@@ -14,7 +14,7 @@ class Error:
         result += f"\nFile {self.pos_start.filename}: line {self.pos_start.ln + 1}, col {self.pos_start.col}"
         result += '\n\n' + string_with_arrows(self.pos_start.filetext, self.pos_start, self.pos_end)
         return result
-    
+
 class IllegalCharError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, "Illegal Character", info)

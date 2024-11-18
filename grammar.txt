@@ -1,3 +1,5 @@
+statements: NEWLINE* expr (NEWLINE+ expr)* NEWLINE*
+
 expr      : KEYWORD:var IDENTIFIER EQUALS expr
           : comp-expr ((KEYWORD:and|KEYWORD:or) comp-expr)*
 
@@ -25,18 +27,35 @@ atom      : INT|FLOAT|STRING|IDENTIFIER
 
 list-expr : LSQUARE (expr (COMMA expr)*)? RSQUARE
 
-if-expr   : KEYWORD:if expr KEYWORD:then expr
-            (KEYWORD:elif expr KEYWORD:then expr)*
-            (KEYWORLD:else expr)?
+if-expr   : KEYWORD:if expr KEYWORD:then
+            (expr if-expr-b|if-expr-c?)
+          | (NEWLINE statements KEYWORD:end|if-expr-b|if-expr-c)
+
+if-expr   : KEYWORD:if expr KEYWORD:then
+            (expr if-expr-b|if-expr-c?)
+          | (NEWLINE statements KEYWORD:end|if-expr-b|if-expr-c)
+
+if-expr-b : KEYWORD:elif expr KEYWORD:then
+            (expr if-expr-b|if-expr-c?)
+          | (NEWLINE statements KEYWORD:end|if-expr-b|if-expr-c)
+
+if-expr-c : KEYWORD:else expr KEYWORD:then
+            expr
+          | (NEWLINE statements KEYWORD:end)
 
 for-expr  : KEYWORD:for IDENTIFIER EQUALS expr KEYWORD:to expr
-            (KEYWORD:step expr)? KEYWORD:do expr
+            (KEYWORD:step expr)? KEYWORD:do
+            expr
+            | (NEWLINE statements KEYWORD:end)
 
-while-expr: KEYWORD:while expr KEYWORD:do expr
+while-expr: KEYWORD:while expr KEYWORD:do
+            expr
+            | (NEWLINE statements KEYWORD:end)
 
 func-def  : KEYWORD:fn IDENTIFIER?
             LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
-            ARROW expr
+            (ARROW expr)
+            | (NEWLINE statements KEYWORD:end)
 
 * 0 or more of
 ? optional

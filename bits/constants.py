@@ -29,6 +29,7 @@ T_LSQUARE = "LSQUARE"
 T_RSQUARE = "RSQUARE"
 T_COMMA = "COMMA"
 T_ARROW = "ARROW"
+T_NEWLINE = "NEWLINE"
 T_EOF = "EOF"
 
 KEYWORDS = [
@@ -45,7 +46,8 @@ KEYWORDS = [
     'do',
     'step',
     'while',
-    'fn'
+    'fn',
+    'end'
 ]
 
 TokenReference = {

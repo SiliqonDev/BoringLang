@@ -24,6 +24,7 @@ class ParseResult:
         self.error = None
         self.node = None
         self.advance_count = 0
+        self.to_reverse_count = 0
     
     def register_next(self):
         self.advance_count += 1
@@ -32,6 +33,12 @@ class ParseResult:
         self.advance_count += res.advance_count
         if res.error: self.error = res.error
         return res.node
+    
+    def try_register(self, res):
+        if res.error:
+            self.to_reverse_count = res.advance_count
+            return None
+        return self.register(res)
     
     def success(self, node):
         self.node = node

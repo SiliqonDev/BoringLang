@@ -1,3 +1,4 @@
+import os
 from .base import *
 from bits.error import *
 
@@ -157,6 +158,9 @@ class String(Value):
         copy.set_context(self.context)
         return copy
     
+    def __str__(self):
+        return self.value
+    
     def __repr__(self):
         return f'\'{self.value}\''
 
@@ -204,20 +208,24 @@ class List(Value):
         return len(self.elements) > 0
 
     def copy(self):
-        copy = List(self.elements[:])
+        copy = List(self.elements)
         copy.set_pos(self.pos_start, self.pos_end)
         copy.set_context(self.context)
         return copy
     
+    def __str__(self):
+        return ", ".join([str(x) for x in self.elements])
+
     def __repr__(self):
         return f'[{", ".join([str(x) for x in self.elements])}]'
 
 
 class Function(BaseFunction):
-    def __init__(self, name, body_node, arg_names):
+    def __init__(self, name, body_node, arg_names, should_return_null):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
+        self.should_return_null = should_return_null
     
     def execute(self, args):
         res = RTResult()
@@ -230,10 +238,10 @@ class Function(BaseFunction):
 
         value = res.register(interpreter.visit(self.body_node, new_context))
         if res.error: return res
-        return res.success(value)
+        return res.success(Number.null if self.should_return_null else value)
     
     def copy(self):
-        copy = Function(self.name, self.body_node, self.arg_names)
+        copy = Function(self.name, self.body_node, self.arg_names, self.should_return_null)
         copy.set_context(self.context)
         copy.set_pos(self.pos_start, self.pos_end)
         return copy
@@ -271,3 +279,40 @@ class BuiltInFunction(BaseFunction):
     
     def __repr__(self):
         return f'<built-in function {self.name}>'
+    
+    def execute_print(self, context):
+        print(str(context.symbol_table.get('value')))
+        return RTResult().success(Number.null)
+    execute_print.arg_names = ['value']
+
+    def execute_print_ret(self, context):
+        return RTResult().success(String(str(context.symbol_table.get('value'))))
+    execute_print_ret.arg_names = ['value']
+
+    def execute_input(self, context):
+        text = input()
+        return RTResult().success(String(text))
+    execute_input.arg_names = []
+
+    def execute_input_int(self, context):
+        text = input()
+        try:
+            n = int(text)
+        except ValueError:
+            return RTResult().failure(RuntimeError(
+                self.pos_start.copy(), self.pos_end.copy(),
+                "Given input could not be converted to number.", context
+            ))
+        return RTResult().success(Number(n))
+    execute_input_int.arg_names = []
+    
+    def execute_clear(self, context):
+        os.system('cls' if os.name == "nt" else 'clear')
+        return RTResult().success(Number.null)
+    execute_clear.arg_names = []
+
+BuiltInFunction.print = BuiltInFunction("print")
+BuiltInFunction.print_ret = BuiltInFunction("print_ret")
+BuiltInFunction.input = BuiltInFunction("input")
+BuiltInFunction.input_int = BuiltInFunction("input_int")
+BuiltInFunction.clear = BuiltInFunction("clear")
