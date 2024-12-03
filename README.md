@@ -1,7 +1,7 @@
 > # BoringLang
 ### A programming language i work on when im bored
 
-
+(outdated documentation)
 # Operators
 
 * The language currently has the following binary operators: +, -, *, **, %, /, //, and, or, !=, ==, >=, <=, >, <
