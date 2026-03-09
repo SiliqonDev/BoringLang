@@ -1,0 +1,11 @@
+fn join(elements, sep)
+    var res = ""
+    var l = len(elements)
+
+    for i = 0 to l do
+        var res = res + elements(i)
+        if i != (l - 1) then res = res + sep
+    end
+
+    return res
+end

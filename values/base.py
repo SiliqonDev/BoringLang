@@ -98,6 +98,6 @@ class BaseFunction(Value):
         res = RTResult()
 
         res.register(self.check_args(arg_names, args))
-        if res.error: return res
+        if res.should_return(): return res
         self.populate_args(arg_names, args, context)
         return res.success(None)

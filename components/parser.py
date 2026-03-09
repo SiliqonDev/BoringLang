@@ -30,7 +30,7 @@ class Parser:
         if not res.error and self.current_tok.type != T_EOF:
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected '+', '-', '*', '/', '//', '^', '==', '!=', '<', '>', <=', '>=', 'and' or 'or'"
+                "Token cannot appear after previous tokens"
             ))
         return res
     
@@ -43,13 +43,15 @@ class Parser:
             res.register_next()
             self.next()
 
-        statement = res.register(self.expr())
+        print('a', self.current_tok)
+        statement = res.register(self.statement())
         if res.error: return res
         statements.append(statement)
 
         more = True
 
         while True:
+            print('b', self.current_tok)
             newline_c = 0
             while self.current_tok.type == T_NEWLINE:
                 res.register_next()
@@ -59,7 +61,7 @@ class Parser:
                 more = False
             
             if not more: break
-            statement = res.try_register(self.expr())
+            statement = res.try_register(self.statement())
             if not statement:
                 self.reverse(res.to_reverse_count)
                 more = False
@@ -69,6 +71,38 @@ class Parser:
         return res.success(ListNode(
             statements, pos_start, self.current_tok.pos_end.copy()
         ))
+    
+    def statement(self):
+        res = ParseResult()
+        pos_start = self.current_tok.pos_start.copy()
+
+        if self.current_tok.matches(T_KEYWORD, "return"):
+            res.register_next()
+            self.next()
+
+            expr = res.try_register(self.expr())
+            if not expr:
+                self.reverse(res.to_reverse_count)
+            return res.success(ReturnNode(expr, pos_start, self.current_tok.pos_start.copy()))
+        
+        if self.current_tok.matches(T_KEYWORD, "continue"):
+            res.register_next()
+            self.next()
+
+            return res.success(ContinueNode(pos_start, self.current_tok.pos_start.copy()))
+
+        if self.current_tok.matches(T_KEYWORD, "break"):
+            res.register_next()
+            self.next()
+
+            return res.success(BreakNode(pos_start, self.current_tok.pos_start.copy()))
+        
+        expr = res.register(self.expr())
+        if res.error: return res.failure(InvalidSyntaxError(
+            self.current_tok.pos_start, self.current_tok.pos_end, "Expected 'return', 'continue', 'break', 'var', 'if', 'for', 'while', 'fn', 'not', int, float, identifier, '+', '-', '[' or '('"
+        ))
+
+        return res.success(expr)
     
     def list_expr(self):
         res = ParseResult()
@@ -150,7 +184,7 @@ class Parser:
                         "Expected 'end'"
                     ))
             else:
-                expr = res.register(self.expr())
+                expr = res.register(self.statement())
                 if res.error: return res
                 else_case = (expr, False)
         
@@ -214,7 +248,7 @@ class Parser:
                 new_cases, else_case = all_cases
                 cases.extend(new_cases)
         else:
-            expr = res.register(self.expr())
+            expr = res.register(self.statement())
             if res.error: return res
             cases.append((condition, expr, False))
 
@@ -307,7 +341,7 @@ class Parser:
 
             return res.success(ForNode(var_name, start_value, end_value, step_value, body, True))
 
-        body = res.register(self.expr())
+        body = res.register(self.statement())
         if res.error: return res
 
         return res.success(ForNode(var_name, start_value, end_value, step_value, body, False))
@@ -326,10 +360,8 @@ class Parser:
 
         condition = res.register(self.expr())
         if res.error: return res
-
-        res.register_next()
-        self.next()
-
+        
+        print('do?',self.current_tok)
         if not self.current_tok.matches(T_KEYWORD, 'do'):
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
@@ -354,7 +386,7 @@ class Parser:
 
             return res.success(WhileNode(condition, body, True))
 
-        body = res.register(self.expr())
+        body = res.register(self.statement())
         if res.error: return res
 
         return res.success(WhileNode(condition, body, False))
@@ -512,7 +544,7 @@ class Parser:
             if self.current_tok.type != T_IDENTIFIER:
                 return res.failure(InvalidSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    "Expected Identifier"
+                    "Expected identifier"
                 ))
             
             var_name = self.current_tok
@@ -614,7 +646,7 @@ class Parser:
             node_to_return = res.register(self.expr())
             if res.error: return res
 
-            return res.success(FuncDefNode(var_name_tok, arg_name_toks, node_to_return, False))
+            return res.success(FuncDefNode(var_name_tok, arg_name_toks, node_to_return, True))
         
         if self.current_tok.type != T_NEWLINE:
             return res.failure(InvalidSyntaxError(
@@ -628,6 +660,7 @@ class Parser:
         body = res.register(self.statements())
         if res.error: return res
 
+        print(self.current_tok)
         if not self.current_tok.matches(T_KEYWORD, 'end'):
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
@@ -637,7 +670,7 @@ class Parser:
         res.register_next()
         self.next()
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, True))
+        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
     ###
 
     def bin_op(self, func_a, ops, func_b=None):

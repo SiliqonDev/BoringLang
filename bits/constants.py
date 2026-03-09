@@ -47,7 +47,10 @@ KEYWORDS = [
     'step',
     'while',
     'fn',
-    'end'
+    'end',
+    'return',
+    'continue',
+    'break'
 ]
 
 TokenReference = {

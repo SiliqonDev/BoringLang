@@ -30,6 +30,10 @@ class Lexer:
                 self.next()
                 continue
 
+            # comment
+            if self.current_char == "#":
+                self.skip_comment()
+
             # new line
             if self.current_char in ";\n":
                 tokens.append(Token(T_NEWLINE, pos_start=self.pos))
@@ -197,3 +201,11 @@ class Lexer:
         
         self.previous()
         return Token(fail, pos_start=pos_start, pos_end=self.pos), None
+    
+    def skip_comment(self):
+        self.next()
+
+        while self.current_char != "\n":
+            self.next()
+        
+        self.next()
